@@ -1,47 +1,55 @@
-import {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContactById,
-} from "../services/contactsServices.js";
-
 import HttpError from "../helpers/HttpError.js";
 import wrapper from "../helpers/wrapper.js";
+import contactsService from "../services/contactsServices.js";
 
-export const getAllContacts = wrapper(async (req, res) => {
-  const result = await listContacts();
+const getAllContacts = async (req, res) => {
+  const result = await contactsService.listContacts();
   res.json(result);
-});
+};
 
-export const getOneContact = wrapper(async (req, res) => {
+const getOneContact = async (req, res) => {
   const { id } = req.params;
-  const result = await getContactById(id);
+  const result = await contactsService.getContactById(id);
+
   if (!result) {
     throw HttpError(404);
   }
-  res.json(result);
-});
 
-export const deleteContact = wrapper(async (req, res) => {
+  res.json(result);
+};
+
+const deleteContact = async (req, res) => {
   const { id } = req.params;
-  const result = await removeContact(id);
+  const result = await contactsService.removeContact(id);
+
   if (!result) {
     throw HttpError(404);
   }
-  res.json(result);
-});
 
-export const createContact = wrapper(async (req, res) => {
-  const result = await addContact(req.body);
+  res.json(result);
+};
+
+const createContact = async (req, res) => {
+  const result = await contactsService.addContact(req.body);
+
   res.status(201).json(result);
-});
+};
 
-export const updateContact = wrapper(async (req, res) => {
+const updateContact = async (req, res) => {
   const { id } = req.params;
-  const result = await updateContactById(id, req.body);
+  const result = await contactsService.updateContact(id, req.body);
+
   if (!result) {
     throw HttpError(404);
   }
+
   res.json(result);
-});
+};
+
+const getAll = wrapper(getAllContacts);
+const getById = wrapper(getOneContact);
+const remove = wrapper(deleteContact);
+const create = wrapper(createContact);
+const update = wrapper(updateContact);
+
+export default { getAll, getById, remove, create, update };

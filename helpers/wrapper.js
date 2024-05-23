@@ -6,7 +6,6 @@ const wrapper = (controller) => {
       next(error);
     }
   };
-
   return func;
 };
 
