@@ -5,6 +5,7 @@ import {
   listContacts,
   removeContact,
   updContact,
+  updFavorite,
 } from "../services/contactsServices.js";
 
 export const getAllContacts = async (req, res, next) => {
@@ -16,7 +17,7 @@ export const getAllContacts = async (req, res, next) => {
   }
 };
 
-export const getOneContact = async (req, res, next) => {
+export const getOneContact = async (req, res) => {
   try {
     const getContact = await getContactById(req.params.id);
     if (!getContact) {
@@ -28,7 +29,7 @@ export const getOneContact = async (req, res, next) => {
   }
 };
 
-export const deleteContact = async (req, res, next) => {
+export const deleteContact = async (req, res) => {
   try {
     const delContact = await removeContact(req.params.id);
     if (!delContact) {
@@ -40,10 +41,10 @@ export const deleteContact = async (req, res, next) => {
   }
 };
 
-export const createContact = async (req, res, next) => {
+export const createContact = async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
-    const newContact = await addContact(name, email, phone);
+    const { name, email, phone, favorite } = req.body;
+    const newContact = await addContact(name, email, phone, favorite);
     if (!newContact) {
       next(HttpError(404));
     }
@@ -53,14 +54,20 @@ export const createContact = async (req, res, next) => {
   }
 };
 
-export const updateContact = async (req, res, next) => {
+export const updateContact = async (req, res) => {
   try {
     const { name, email, phone } = req.body;
-    const updatedContact = await updContact(req.params.id, name, email, phone);
-    if (!updatedContact) {
-      next(HttpError(404));
-    }
-    res.status(200).send(updatedContact);
+    const upContact = await updContact(req.params.id, name, email, phone);
+    res.status(200).send(upContact);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateFavorite = async (req, res) => {
+  try {
+    const updatedFavorite = await updFavorite(req.params.id, req.body.favorite);
+    res.status(200).send(updatedFavorite);
   } catch (err) {
     next(err);
   }

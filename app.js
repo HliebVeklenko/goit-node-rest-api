@@ -1,10 +1,24 @@
+import mongoose from "mongoose";
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 
 import contactsRouter from "./routes/contactsRouter.js";
 
+const DB_URI =
+  "mongodb+srv://user:gRO0UhqQcFIDZ5lp@cluster0.1fkui4d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
 const app = express();
+
+mongoose
+  .connect(DB_URI)
+  .then(() => {
+    console.log("Database connection successful");
+  })
+  .catch((err) => {
+    console.log(err);
+    process.exit(1);
+  });
 
 app.use(morgan("tiny"));
 app.use(cors());
