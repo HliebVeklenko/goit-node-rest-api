@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 import express from "express";
 import morgan from "morgan";
+import dotenv from "dotenv";
 import cors from "cors";
 
 import contactsRouter from "./routes/contactsRouter.js";
 
-const DB_URI =
-  "mongodb+srv://user:gRO0UhqQcFIDZ5lp@cluster0.1fkui4d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+dotenv.config();
+
+const DB_URI = process.env.DB_URI;
 
 const app = express();
 
