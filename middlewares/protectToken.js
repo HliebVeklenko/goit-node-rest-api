@@ -8,7 +8,7 @@ export const protect = async (req, res, next) => {
 
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(id);
+    const user = await User.findOne(id);
 
     if (user === null || user.token !== token) {
       return next(HttpError(401));

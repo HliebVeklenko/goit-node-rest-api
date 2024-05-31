@@ -1,74 +1,89 @@
 import HttpError from "../helpers/HttpError.js";
 import {
-  addContact,
-  getContactById,
   listContacts,
+  getContactById,
   removeContact,
+  addContact,
   updContact,
-  updFavorite,
 } from "../services/contactsServices.js";
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    const getContacts = await listContacts();
-    res.send(getContacts);
-  } catch (err) {
-    next(err);
+    const { _id: owner } = req.user;
+    const contacts = await listContacts(owner);
+
+    res.json(contacts);
+  } catch (error) {
+    next(error);
   }
 };
 
-export const getOneContact = async (req, res) => {
+export const getOneContact = async (req, res, next) => {
   try {
-    const getContact = await getContactById(req.params.id);
-    if (!getContact) {
-      next(HttpError(404));
+    const { id } = req.params;
+    const { _id: owner } = req.user;
+    const contact = await getContactById(id, owner);
+    if (contact) {
+      res.json(contact);
+    } else {
+      throw HttpError(404, "Contact not found");
     }
-    res.status(200).send(getContact);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
-export const deleteContact = async (req, res) => {
+export const deleteContact = async (req, res, next) => {
   try {
-    const delContact = await removeContact(req.params.id);
-    if (!delContact) {
-      next(HttpError(404));
+    const { id } = req.params;
+    const { _id: owner } = req.user;
+    const deletedContact = await removeContact(id, owner);
+    if (deletedContact) {
+      res.json(deletedContact);
+    } else {
+      throw HttpError(404, "Contact not found");
     }
-    res.status(200).send(delContact);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
-export const createContact = async (req, res) => {
+export const createContact = async (req, res, next) => {
   try {
-    const { name, email, phone, favorite } = req.body;
-    const newContact = await addContact(name, email, phone, favorite);
-    if (!newContact) {
-      next(HttpError(404));
+    const newContact = await addContact({ ...req.body, owner: req.user._id });
+    res.status(201).json(newContact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { _id: owner } = req.user;
+
+    const updatedContact = await updContact(id, owner, req.body);
+
+    if (updatedContact) {
+      res.json(updatedContact);
+    } else {
+      throw HttpError(404, "Contact not found");
     }
-    res.status(201).send(newContact);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
-export const updateContact = async (req, res) => {
+export const updateFavoriteContact = async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
-    const upContact = await updContact(req.params.id, name, email, phone);
-    res.status(200).send(upContact);
-  } catch (err) {
-    next(err);
-  }
-};
+    const { id } = req.params;
+    const { _id: owner } = req.user;
 
-export const updateFavorite = async (req, res) => {
-  try {
-    const updatedFavorite = await updFavorite(req.params.id, req.body.favorite);
-    res.status(200).send(updatedFavorite);
-  } catch (err) {
-    next(err);
+    const updatedContact = await updContact(id, owner, req.body);
+    if (!updatedContact) throw HttpError(404, "Contact not found");
+
+    res.json(updatedContact);
+  } catch (error) {
+    next(error);
   }
 };
