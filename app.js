@@ -7,6 +7,7 @@ import cors from "cors";
 import contactsRouter from "./routes/contactsRouter.js";
 import usersRouter from "./routes/usersRouter.js";
 import { protect } from "./middlewares/protectToken.js";
+import path from "node:path";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
 
+app.use("/avatars", express.static(path.resolve("public/avatars")));
 app.use("/api/contacts", protect, contactsRouter);
 app.use("/users", usersRouter);
 

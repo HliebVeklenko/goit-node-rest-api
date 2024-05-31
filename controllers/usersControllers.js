@@ -1,5 +1,10 @@
 import bcrypt, { hash } from "bcrypt";
 
+import gravatar from "gravatar";
+import * as fs from "node:fs/promises";
+import path from "node:path";
+import HttpError from "../helpers/HttpError.js";
+
 import { User } from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 
@@ -13,10 +18,19 @@ export const register = async (req, res, next) => {
     }
 
     const hash = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ email, password: hash });
-    res
-      .status(201)
-      .json({ user: { email, subscription: newUser.subscription } });
+    const avatar = gravatar.url(email, { protocol: "https", size: 200 });
+    const newUser = await User.create({
+      email,
+      password: hash,
+      avatarURL: avatar,
+    });
+    res.status(201).json({
+      user: {
+        email,
+        subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -61,4 +75,27 @@ export const logOut = async (req, res, next) => {
 export const current = async (req, res, next) => {
   const { email, subscription } = req.user;
   res.json({ email, subscription });
+};
+
+export const updateAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded. Try again." });
+    }
+
+    const fileName = req.file.filename;
+    await fs.rename(req.file.path, path.resolve("public/avatars", fileName));
+
+    const avatarURL = path.join("/avatars", fileName);
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatarURL: avatarURL },
+      { new: true }
+    );
+
+    res.send(user);
+  } catch (error) {
+    next(error);
+  }
 };
